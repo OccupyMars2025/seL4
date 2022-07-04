@@ -46,7 +46,14 @@ Upcoming release: BREAKING
 * aarch32 VM fault messages now deliver original (untranslated) faulting IP in a hypervisor context, matching
   aarch64 behaviour.
 
+## MCS
+
+* To grant capabilities when replying to a call in MCS configurations, it is now necessary to have grant rights on both
+  the reply cap and the endpoint cap used to receive the call. Previously, the grant right on the endpoint cap was
+  ignored in MCS configurations.
+
 ## Upgrade Notes
+
 ---
 12.1.0 2021-06-10: SOURCE COMPATIBLE
 
