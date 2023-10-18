@@ -151,8 +151,6 @@ exception_t Arch_decodeIRQControlInvocation(word_t invLabel, word_t length, cte_
         word_t pci_func = getSyscallArg(4, buffer);
         word_t handle = getSyscallArg(5, buffer);
         x86_irq_state_t irqState;
-        /* until we support msi interrupt remaping through vt-d we ignore the
-         * vector and trust the user */
 
         if (pci_bus > PCI_BUS_MAX) {
             current_syscall_error.type = seL4_RangeError;
@@ -175,6 +173,13 @@ exception_t Arch_decodeIRQControlInvocation(word_t invLabel, word_t length, cte_
             return EXCEPTION_SYSCALL_ERROR;
         }
 
+#ifdef CONFIG_IOMMU
+        status = vtd_inspect_irte_msi(handle, vector);
+        if (status != EXCEPTION_NONE) {
+            return status;
+        }
+        vtd_create_irte_msi(handle, vector, pci_bus, pci_dev, pci_func);
+#endif
         irqState = x86_irq_state_irq_msi_new(pci_bus, pci_dev, pci_func, handle);
 
         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
